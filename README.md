@@ -4,8 +4,6 @@
 
 To design and implement an **Automatic Street Lighting System using STM32 Nucleo-L031K6** that senses the surrounding light intensity and automatically switches the streetlight **ON during dark conditions** and **OFF during bright conditions**.
 
----
-
 ## Components Required
 
 - STM32 Nucleo-L031K6
@@ -15,8 +13,6 @@ To design and implement an **Automatic Street Lighting System using STM32 Nucleo
 - Wokwi Simulator
 - Connecting wires
 - Serial Monitor
-
----
 
 ## Theory
 
@@ -35,8 +31,6 @@ For this experiment:
 
 Two separate threshold values are used to prevent frequent switching of the streetlight when the light intensity is close to the switching point.
 
----
-
 ## Pin Configuration
 
 | Component | STM32 Pin | Function |
@@ -47,8 +41,6 @@ Two separate threshold values are used to prevent frequent switching of the stre
 | Streetlight LED | PB3 | Digital Output |
 | USART2 TX | PA2 | Serial Data Transmission |
 | USART2 RX | PA15 | Serial Data Reception |
-
----
 
 ## Block Diagram
 
@@ -83,8 +75,6 @@ Two separate threshold values are used to prevent frequent switching of the stre
        Serial Monitor
 ~~~
 
----
-
 ## Threshold Conditions
 
 | ADC Value | Lighting Condition | Streetlight Status |
@@ -92,8 +82,6 @@ Two separate threshold values are used to prevent frequent switching of the stre
 | 0–2200 | Bright | OFF |
 | 2201–2799 | Intermediate | Maintain Previous State |
 | 2800–4095 | Dark | ON |
-
----
 
 ## Algorithm
 
@@ -114,7 +102,50 @@ Two separate threshold values are used to prevent frequent switching of the stre
 15. Wait for one second.
 16. Repeat the process continuously.
 
----
+## Program 
+
+```
+
+#include "main.h"
+
+ADC_HandleTypeDef hadc1;
+
+#define LIGHT_THRESHOLD 2000
+
+uint32_t ldr_value;
+
+int main(void) { HAL_Init();
+
+SystemClock_Config();
+MX_GPIO_Init();
+MX_ADC1_Init();
+
+while (1)
+{
+    HAL_ADC_Start(&hadc1);
+
+    if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK)
+    {
+        ldr_value = HAL_ADC_GetValue(&hadc1);
+    }
+
+    HAL_ADC_Stop(&hadc1);
+
+    if (ldr_value < LIGHT_THRESHOLD)
+    {
+        // Dark condition
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+    }
+    else
+    {
+        // Daylight condition
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+    }
+
+    HAL_Delay(500);
+}
+}
+```
 
 ## Circuit Connections
 
@@ -132,8 +163,6 @@ Two separate threshold values are used to prevent frequent switching of the stre
 |---|---|
 | Anode (+) | PB3 through 220 Ω resistor |
 | Cathode (-) | GND |
-
----
 
 ## Circuit Diagram
 
@@ -177,8 +206,6 @@ GND  -----| GND           |
       Wokwi Serial Monitor
 ~~~
 
----
-
 ## Procedure
 
 1. Open **Wokwi Simulator**.
@@ -196,9 +223,8 @@ GND  -----| GND           |
 13. Observe the LED and the corresponding values on the Serial Monitor.
 14. Verify that the LED switches ON during dark conditions and OFF during bright conditions.
 
----
-
 ## Expected Output
+<img width="589" height="497" alt="night_light" src="https://github.com/user-attachments/assets/95fdc644-c532-4460-aa57-7d459167eaa6" />
 
 ### Bright Condition
 
@@ -216,8 +242,6 @@ Darkness: 80%
 Streetlight: ON
 ~~~
 
----
-
 ## Working
 
 The potentiometer is used to simulate the operation of an **LDR light sensor**. It produces an analog voltage according to its position.
@@ -234,8 +258,6 @@ When the ADC value is between **2201 and 2799**, the previous streetlight state 
 
 The ADC value, darkness percentage, and streetlight status are also transmitted through **USART2** and displayed on the **Wokwi Serial Monitor**.
 
----
-
 ## Applications
 
 - Automatic street lighting
@@ -245,8 +267,6 @@ The ADC value, darkness percentage, and streetlight status are also transmitted 
 - Parking-area lighting
 - Smart city lighting systems
 - Energy-efficient outdoor lighting
-
----
 
 ## Result
 
